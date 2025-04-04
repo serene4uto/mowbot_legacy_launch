@@ -11,11 +11,11 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
 
     extra_config_path = PathJoinSubstitution(
-        [FindPackageShare('mowbot_bringup'), 'config', 'extra.yaml']
+        [FindPackageShare('mowbot_legacy_launch'), 'config', 'extra.yaml']
     )
 
     rviz_config_path = PathJoinSubstitution(
-        [FindPackageShare('mowbot_bringup'), 'rviz', 'mowbot.rviz']
+        [FindPackageShare('mowbot_legacy_launch'), 'rviz', 'mowbot.rviz']
     )
 
     rl_config_path = PathJoinSubstitution(
@@ -81,25 +81,13 @@ def generate_launch_description():
             default_value='false',
             description='Use micro-ros'
         ),
-        
-        DeclareLaunchArgument(
-            name='uros_serial_port',
-            default_value='/dev/MBB-UROS',
-            description='Serial port for uros communication'
-        ),
-
-        DeclareLaunchArgument(
-            name='uros_baudrate',
-            default_value='115200',
-            description='Baudrate for uros serial communication'
-        ),
 
         Node(
             package='micro_ros_agent',
             executable='micro_ros_agent',
             name='micro_ros_agent',
             output='screen',
-            arguments=['serial', '--dev', LaunchConfiguration("uros_serial_port"), '--baudrate', LaunchConfiguration("uros_baudrate")],
+            arguments=['udp4', '-p', '8888'],
             condition=IfCondition(LaunchConfiguration("uros"))
         ),
 
@@ -161,7 +149,7 @@ def generate_launch_description():
 
         IncludeLaunchDescription(
             PathJoinSubstitution(
-                [FindPackageShare('mowbot_bringup'), 'launch', 'sensors.launch.py']
+                [FindPackageShare('mowbot_legacy_launch'), 'launch', 'main', 'components', 'sensors.launch.py']
             ),
             launch_arguments={
                 'namespace': LaunchConfiguration('namespace'),

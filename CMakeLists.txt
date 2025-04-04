@@ -9,8 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 install(DIRECTORY
-  launch/main
-  launch/exp
+  launch
   config
   rviz
   mvc
