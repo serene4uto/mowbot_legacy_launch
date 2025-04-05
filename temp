@@ -1,0 +1,5 @@
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
+"{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}" --rate 10
+
+ros2 launch mowbot_legacy_launch bringup.launch.py uros:=true foxglove:=true imu:=true madgwick:=true
+ros2 launch mowbot_legacy_launch test_nav_no_map.launch.py rviz:=true rl:=true

@@ -14,18 +14,23 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
 
     nav2_params = PathJoinSubstitution(
-        [FindPackageShare('mowbot_legacy_launch'), 'config', 'gps_nav_no_maps_params.yaml']
+        [FindPackageShare('mowbot_legacy_launch'), 'config', 'nav_no_map_params.yaml']
     )
     configured_params = RewrittenYaml(
         source_file=nav2_params, root_key="", param_rewrites="", convert_types=True
     )
 
-    mapviz_config = PathJoinSubstitution(
-        [FindPackageShare('mowbot_navigation'), 'config', 'gps_wpf.mvc']
+    rl_config_path = PathJoinSubstitution(
+        [FindPackageShare('mowbot_localization'), 'config', 'ekf_params.yaml']
     )
 
-    
     return LaunchDescription([
+
+        DeclareLaunchArgument(
+            "namespace",
+            default_value="",
+            description="Top-level namespace"
+        ),
 
         DeclareLaunchArgument(
             "rviz",
@@ -34,27 +39,35 @@ def generate_launch_description():
         ),
 
         DeclareLaunchArgument(
-            "mapviz",
-            default_value="False",
-            description="Whether to launch MapViz"
+            "tf",
+            default_value="True",
+            description="Whether to launch TF"
         ),
 
         DeclareLaunchArgument(
-            "rl",
+            name='rl',
+            default_value='false',
+            description='Use robot_localization'
+        ),
+
+        DeclareLaunchArgument(
+            "wpfl",
             default_value="False",
-            description="Whether to launch Robot Localization"
+            description="Whether to launch waypoints follower"
         ),
-        
-        # robot localization
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [FindPackageShare('mowbot_localization'), 'launch', 'rl_dual_ekf_navsat.launch.py']
-                )
-            ),
-            condition=IfCondition(LaunchConfiguration("rl"))
+
+        Node(
+            namespace=LaunchConfiguration('namespace'),
+            condition=IfCondition(LaunchConfiguration("rl")),
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            output='screen',
+            parameters=[
+                rl_config_path
+            ]
         ),
-        
+
         # nav2
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -79,26 +92,19 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration("rviz"))
         ),
 
-        # mapviz
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [FindPackageShare('mowbot_navigation'), 'launch', 'mapviz.launch.py']
-                )
-            ),
-            launch_arguments={
-                "fix_topic": "combined_gps/fix",
-                "mvc_config": mapviz_config,
-            }.items(),
-            condition=IfCondition(LaunchConfiguration("mapviz"))
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+            condition=IfCondition(LaunchConfiguration("tf"))
         ),
 
         Node(
-            package="py_mowbot_utils",
-            executable="gps_waypoints_follower",
-            name="gps_waypoints_follower",
-            output="screen",
+            condition=IfCondition(LaunchConfiguration("wpfl")),
+            package='py_mowbot_utils',
+            executable='nav_no_map_wp_follower',
+            name='nav_no_map_wp_follower',
+            output='screen',
         ),
 
     ])
-
