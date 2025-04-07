@@ -59,15 +59,8 @@ def generate_launch_description():
         ),
 
         DeclareLaunchArgument(
-            name='gpsl',
+            name='um982',
             default_value='false',
-            description='Whether to start the left gps'
-        ),
-
-        DeclareLaunchArgument(
-            name='gpsr',
-            default_value='false',
-            description='Whether to start the right gps'
         ),
 
         Node(
