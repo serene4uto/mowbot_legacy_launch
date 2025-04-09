@@ -59,8 +59,9 @@ def generate_launch_description():
         ),
 
         DeclareLaunchArgument(
-            name='um982',
+            name='gps',
             default_value='false',
+            description='Whether to start the gps'
         ),
 
         Node(
@@ -104,33 +105,27 @@ def generate_launch_description():
             executable='ntrip_ros.py',
             parameters=[gps_config_path],
             remappings=[
-                ('/nmea', '/ublox_gpsl/nmea'),
+                # input
+                ('/nmea', '/gps/nmea'),
+                #ouput
             ]
         ),  
-
+        
         Node(
+            condition=IfCondition(LaunchConfiguration('gps')),
             namespace=LaunchConfiguration('namespace'),
-            condition=IfCondition(LaunchConfiguration('gpsl')),
-            name='ublox_gpsl_node',
-            package='ublox_gps',
-            executable='ublox_gps_node',
-            output='both',
+            package='um982_py_ros',
+            executable='um982_node',
+            name='um982_node',
+            output='screen',
             parameters=[gps_config_path],
             remappings=[
-                ('/nmea', '/ublox_gpsl/nmea'),
+                # input
+                ('/rtcm', '/rtcm'),
+                # output
+                ('/nmea', '/gps/nmea'),
+                ('/fix', '/gps/fix'),
+                ('/heading', '/gps/heading')
             ]
-        ),
-
-        Node(
-            namespace=LaunchConfiguration('namespace'),
-            condition=IfCondition(LaunchConfiguration('gpsr')),
-            name='ublox_gpsr_node',
-            package='ublox_gps',
-            executable='ublox_gps_node',
-            output='both',
-            parameters=[gps_config_path],
-            remappings=[
-                ('/nmea', '/ublox_gpsr/nmea'),
-            ]
-        ),
+        )
     ])

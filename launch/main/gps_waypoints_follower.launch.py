@@ -21,7 +21,7 @@ def generate_launch_description():
     )
 
     mapviz_config = PathJoinSubstitution(
-        [FindPackageShare('mowbot_navigation'), 'config', 'gps_wpf.mvc']
+        [FindPackageShare('mowbot_legacy_launch'), 'mvc', 'gps_wp_follower.mvc']
     )
 
     
@@ -49,7 +49,8 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 PathJoinSubstitution(
-                    [FindPackageShare('mowbot_localization'), 'launch', 'rl_dual_ekf_navsat.launch.py']
+                    [FindPackageShare('mowbot_legacy_launch'), 
+                    'launch', 'main', 'components', 'rl_dual_ekf_navsat.launch.py']
                 )
             ),
             condition=IfCondition(LaunchConfiguration("rl"))
@@ -87,7 +88,7 @@ def generate_launch_description():
                 )
             ),
             launch_arguments={
-                "fix_topic": "combined_gps/fix",
+                "fix_topic": "gps/fix",
                 "mvc_config": mapviz_config,
             }.items(),
             condition=IfCondition(LaunchConfiguration("mapviz"))

@@ -1,80 +1,22 @@
 /**:
-  ublox_gpsl_node:
+  um982_node:
     ros__parameters:
-      config_on_startup: true
-      debug: 4                    # Range 0-4 (0 means no debug statements will print)
-      device: /dev/UBLOX-GNSS-L
+      port:
+        gnss: /dev/UM982
+        gnss_baudrate: 115200
+        rtcm: /dev/UM982-RTCM
+        rtcm_baudrate: 115200
+
       frame_id: gps_left_link
-      uart1:
-        baudrate: 115200
       
-      gnss:
-        galileo: true
-        gps: true
-        glonass: true             
-        beidou: true             
-        qzss: true              
-
-      dynamic_model: portable    # Dynamic Platform Model
-      rate: 17.0
-      nav_rate: 1
-      fix_mode: auto
-      dr_limit: 0
-      # TMODE3 Config
-      tmode3: 0                   # Survey-In Mode
-      sv_in:
-        reset: false              # True: disables and re-enables survey-in (resets)
-                                  # False: Disables survey-in only if TMODE3 is
-                                  # disabled
-        min_dur: 300              # Survey-In Minimum Duration [s]
-        acc_lim: 3.0              # Survey-In Accuracy Limit [m]
-      
-      dgnss_mode: 3               # Fixed mode
-      
-
-      inf:
-        all: true                   # Whether to display all INF messages in console
+      # 90 deg offset right to left in rad
+      heading_offset: 1.5707963267948966
 
       publish:
-        all: false
-
-/**:
-  ublox_gpsr_node:
-    ros__parameters:
-      config_on_startup: true
-      debug: 4                    # Range 0-4 (0 means no debug statements will print)
-      device: /dev/UBLOX-GNSS-R
-      frame_id: gps_right_link
-      uart1:
-        baudrate: 115200
+        nmea: true
       
-      gnss:
-        galileo: true
-        gps: true
-        glonass: true             
-        beidou: true             
-        qzss: true              
-
-      dynamic_model: portable    # Dynamic Platform Model
-      rate: 17.0
-      nav_rate: 1
-      fix_mode: auto
-      # TMODE3 Config
-      tmode3: 0                   # Survey-In Mode
-      sv_in:
-        reset: false              # True: disables and re-enables survey-in (resets)
-                                  # False: Disables survey-in only if TMODE3 is
-                                  # disabled
-        min_dur: 300              # Survey-In Minimum Duration [s]
-        acc_lim: 3.0              # Survey-In Accuracy Limit [m]
+      verbose: true
       
-      dgnss_mode: 3               # Fixed mode
-
-      inf:
-        all: true                   # Whether to display all INF messages in console
-
-      publish:
-        all: false
 
 
 /**:

@@ -9,7 +9,7 @@ from launch.conditions import IfCondition
 def generate_launch_description():
 
     mapviz_config = PathJoinSubstitution(
-        [FindPackageShare('mowbot_navigation'), 'mapviz', 'gps_wp_logger.mvc']
+        [FindPackageShare('mowbot_legacy_launch'), 'mvc', 'gps_wp_logger.mvc']
     )
 
     # Declare launch arguments
@@ -35,7 +35,8 @@ def generate_launch_description():
     rl_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare('mowbot_localization'), 'launch', 'rl_dual_ekf_navsat.launch.py']
+                [FindPackageShare('mowbot_legacy_launch'), 
+                'launch', 'main', 'components', 'rl_dual_ekf_navsat.launch.py']
             )
         ),
         condition=IfCondition(LaunchConfiguration("rl"))
@@ -45,11 +46,12 @@ def generate_launch_description():
     mapviz_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare('mowbot_navigation'), 'launch', 'mapviz.launch.py']
+                [FindPackageShare('mowbot_legacy_launch'), 
+                'launch', 'main', 'components', 'mapviz.launch.py']
             )
         ),
         launch_arguments={
-            "fix_topic": "/combined_gps/filtered",
+            "fix_topic": "gps/fix_filtered",
             "mvc_config": mapviz_config,
         }.items()
     )
@@ -61,8 +63,8 @@ def generate_launch_description():
         name='gps_waypoints_logger',
         output='screen',
         remappings=[
-            ('/gps/fix', '/combined_gps/filtered'),
-            ('/imu', '/imu_gps_heading/data')
+            ('/gps/fix', 'gps/fix_filtered'),
+            ('/imu', '/gps/heading')
         ]
     )
 

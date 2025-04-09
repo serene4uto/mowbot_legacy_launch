@@ -6,7 +6,85 @@ from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+ARGS = [
+    DeclareLaunchArgument(
+        'namespace',
+        default_value='',
+        description='Namespace'
+    ),
 
+    DeclareLaunchArgument(
+        'rviz',
+        default_value='false',
+        description='Whether to start rviz'
+    ),
+
+    DeclareLaunchArgument(
+        'imu',
+        default_value='false',
+        description='Whether to start the imu'
+    ),
+
+    DeclareLaunchArgument(
+        'laser',
+        default_value='false',
+        description='Whether to start the laser'
+    ),
+
+    DeclareLaunchArgument(
+        'dcam',
+        default_value='false',
+        description='Whether to start the depth camera'
+    ),
+
+    DeclareLaunchArgument(
+        name='madgwick',
+        default_value='false',
+        description='Use madgwick to fuse imu and magnetometer'
+    ),
+
+    # DeclareLaunchArgument(
+    #     name='rl',
+    #     default_value='false',
+    #     description='Use robot_localization'
+    # ),
+
+    # DeclareLaunchArgument(
+    #     name='rlgps',
+    #     default_value='false',
+    #     description='Use robot_localization with gps'
+    # ),
+
+    DeclareLaunchArgument(
+        name='uros',
+        default_value='false',
+        description='Use micro-ros'
+    ),
+    
+    DeclareLaunchArgument(
+        'ntrip',
+        default_value='false',
+        description='Whether to start the ntrip client'
+    ),
+
+    DeclareLaunchArgument(
+        'gps',
+        default_value='false',
+        description='Whether to start the gps'
+    ),
+
+    DeclareLaunchArgument(
+        'foxglove',
+        default_value='false',
+        description='Whether to start the foxglove'
+    ),
+
+    DeclareLaunchArgument(
+        'sensormon',
+        default_value='false',
+        description='Whether to start the sensor monitor'
+    ),
+]
 
 def generate_launch_description():
 
@@ -18,70 +96,16 @@ def generate_launch_description():
         [FindPackageShare('mowbot_legacy_launch'), 'rviz', 'mowbot.rviz']
     )
 
-    rl_config_path = PathJoinSubstitution(
-        [FindPackageShare('mowbot_localization'), 'config', 'ekf_params.yaml']
-    )
+    # rl_config_path = PathJoinSubstitution(
+    #     [FindPackageShare('mowbot_localization'), 'config', 'ekf_params.yaml']
+    # )
 
-    rlgps_config_path = PathJoinSubstitution(
-        [FindPackageShare('mowbot_localization'), 'config', 'dual_ekf_gps_params.yaml']
-    )
+    # rlgps_config_path = PathJoinSubstitution(
+    #     [FindPackageShare('mowbot_localization'), 'config', 'dual_ekf_gps_params.yaml']
+    # )
 
-    return LaunchDescription([  
-
-        DeclareLaunchArgument(
-            'namespace',
-            default_value='',
-            description='Namespace'
-        ),
-
-        DeclareLaunchArgument(
-            'rviz',
-            default_value='false',
-            description='Whether to start rviz'
-        ),
-
-        DeclareLaunchArgument(
-            'imu',
-            default_value='false',
-            description='Whether to start the imu'
-        ),
-
-        DeclareLaunchArgument(
-            'laser',
-            default_value='false',
-            description='Whether to start the laser'
-        ),
-
-        DeclareLaunchArgument(
-            'dcam',
-            default_value='false',
-            description='Whether to start the depth camera'
-        ),
-
-        DeclareLaunchArgument(
-            name='madgwick',
-            default_value='false',
-            description='Use madgwick to fuse imu and magnetometer'
-        ),
-
-        DeclareLaunchArgument(
-            name='rl',
-            default_value='false',
-            description='Use robot_localization'
-        ),
-
-        DeclareLaunchArgument(
-            name='rlgps',
-            default_value='false',
-            description='Use robot_localization with gps'
-        ),
-
-        DeclareLaunchArgument(
-            name='uros',
-            default_value='false',
-            description='Use micro-ros'
-        ),
-
+    return LaunchDescription(ARGS + [  
+        
         Node(
             package='micro_ros_agent',
             executable='micro_ros_agent',
@@ -90,43 +114,6 @@ def generate_launch_description():
             arguments=['udp4', '-p', '8888'],
             condition=IfCondition(LaunchConfiguration("uros"))
         ),
-
-        DeclareLaunchArgument(
-            'ntrip',
-            default_value='false',
-            description='Whether to start the ntrip client'
-        ),
-
-        DeclareLaunchArgument(
-            'gpsl',
-            default_value='false',
-            description='Whether to start the left gps'
-        ),
-
-        DeclareLaunchArgument(
-            'gpsr',
-            default_value='false',
-            description='Whether to start the right gps'
-        ),
-
-        DeclareLaunchArgument(
-            'dgps_compass',
-            default_value='false',
-            description='Whether to start the dual gps compass'
-        ),
-
-        DeclareLaunchArgument(
-            'foxglove',
-            default_value='false',
-            description='Whether to start the foxglove'
-        ),
-
-        DeclareLaunchArgument(
-            'sensormon',
-            default_value='false',
-            description='Whether to start the sensor monitor'
-        ),
-
 
         IncludeLaunchDescription(
             PathJoinSubstitution(
@@ -157,8 +144,7 @@ def generate_launch_description():
                 'laser': LaunchConfiguration('laser'),
                 'dcam': LaunchConfiguration('dcam'),
                 'ntrip': LaunchConfiguration('ntrip'),
-                'gpsl': LaunchConfiguration('gpsl'),
-                'gpsr': LaunchConfiguration('gpsr'),
+                'gps': LaunchConfiguration('gps'),
             }.items()
         ),
 
@@ -176,103 +162,95 @@ def generate_launch_description():
             ]
         ),
 
-        #Perception
-        GroupAction(
-            actions=[
-                Node(
-                    namespace=LaunchConfiguration('namespace'),
-                    package='py_mowbot_utils',
-                    executable='dual_gps_compass',
-                    name='dual_gps_compass',
-                    output='screen',
-                    condition=IfCondition(LaunchConfiguration('dgps_compass')),
-                )
-            ]
-        ),
+        # perception
+        # GroupAction(
+            
+        # ),
 
-        # robot_localization
-        Node(
-            namespace=LaunchConfiguration('namespace'),
-            condition=IfCondition(LaunchConfiguration("rl")),
-            package='robot_localization',
-            executable='ekf_node',
-            name='ekf_filter_node',
-            output='screen',
-            parameters=[
-                rl_config_path
-            ]
-        ),
+        # # localization
+        # Node(
+        #     namespace=LaunchConfiguration('namespace'),
+        #     condition=IfCondition(LaunchConfiguration("rl")),
+        #     package='robot_localization',
+        #     executable='ekf_node',
+        #     name='ekf_filter_node',
+        #     output='screen',
+        #     parameters=[
+        #         rl_config_path
+        #     ]
+        # ),
 
-        GroupAction(
-            actions = [
-                Node(
-                    namespace=LaunchConfiguration('namespace'),
-                    package='robot_localization',
-                    executable='ekf_node',
-                    name='ekf_filter_node_odom',
-                    output='screen',
-                    parameters=[
-                        rlgps_config_path,
-                        {"use_sim_time": False},
-                    ],
-                    remappings=[
-                        #input
-                        ("odom", "/mowbot_base/odom"),
-                        ("imu", "imu/data"),
-                        #output
-                        ("odometry/filtered", "odometry/local")
-                    ]
-                ),
+        # GroupAction(
+        #     actions = [
+        #         Node(
+        #             namespace=LaunchConfiguration('namespace'),
+        #             package='robot_localization',
+        #             executable='ekf_node',
+        #             name='ekf_filter_node_odom',
+        #             output='screen',
+        #             parameters=[
+        #                 rlgps_config_path,
+        #                 {"use_sim_time": False},
+        #             ],
+        #             remappings=[
+        #                 #input
+        #                 ("odom", "/mowbot_base/odom"),
+        #                 ("imu", "imu/data"),
+        #                 #output
+        #                 ("odometry/filtered", "odometry/local")
+        #             ]
+        #         ),
 
-                Node(
-                    namespace=LaunchConfiguration('namespace'),
-                    package='robot_localization',
-                    executable='ekf_node',
-                    name='ekf_filter_node_map',
-                    output='screen',
-                    parameters=[
-                        rlgps_config_path,
-                        {"use_sim_time": False},
-                    ],
-                    remappings=[
-                        #input
-                        ("odom", "/mowbot_base/odom"),
-                        ("imu", "imu/data"),
-                        ("odometry/gps", "odometry/gpsr"),
-                        #output
-                        ("odometry/filtered", "odometry/global")
-                    ]
-                ),
+        #         Node(
+        #             namespace=LaunchConfiguration('namespace'),
+        #             package='robot_localization',
+        #             executable='ekf_node',
+        #             name='ekf_filter_node_map',
+        #             output='screen',
+        #             parameters=[
+        #                 rlgps_config_path,
+        #                 {"use_sim_time": False},
+        #             ],
+        #             remappings=[
+        #                 #input
+        #                 ("odom", "/mowbot_base/odom"),
+        #                 ("imu", "imu/data"),
+        #                 ("odometry/gps", "odometry/gpsr"),
+        #                 #output
+        #                 ("odometry/filtered", "odometry/global")
+        #             ]
+        #         ),
 
-                Node(
-                    namespace=LaunchConfiguration('namespace'),
-                    package='robot_localization',
-                    executable='navsat_transform_node',
-                    name='navsat_transform_node',
-                    output='screen',
-                    parameters=[
-                        rlgps_config_path,
-                        {"use_sim_time": False},
-                    ],
-                    remappings=[
-                        #input
-                        ("odometry/filtered", "odometry/global"),
-                        ("gps/fix", "/ublox_gpsr_node/fix"),
-                        ("imu", "imu/data"),
-                        #output
-                        ("odometry/gps", "odometry/gpsr" ),
-                        ("gps/filtered", "gpsr/filtered"),
-                    ]
-                ),
+        #         Node(
+        #             namespace=LaunchConfiguration('namespace'),
+        #             package='robot_localization',
+        #             executable='navsat_transform_node',
+        #             name='navsat_transform_node',
+        #             output='screen',
+        #             parameters=[
+        #                 rlgps_config_path,
+        #                 {"use_sim_time": False},
+        #             ],
+        #             remappings=[
+        #                 #input
+        #                 ("odometry/filtered", "odometry/global"),
+        #                 ("gps/fix", "/ublox_gpsr_node/fix"),
+        #                 ("imu", "imu/data"),
+        #                 #output
+        #                 ("odometry/gps", "odometry/gpsr" ),
+        #                 ("gps/filtered", "gpsr/filtered"),
+        #             ]
+        #         ),
 
-            ],
-            condition=IfCondition(LaunchConfiguration("rlgps"))
-        ),
+        #     ],
+        #     condition=IfCondition(LaunchConfiguration("rlgps"))
+        # ),
 
+        # utilities
         Node(
             namespace=LaunchConfiguration('namespace'),
             package='py_mowbot_utils',
-            executable='sensor_monitor',
+            executable='sensor_monitor_2',
             name='sensor_monitor',
             output='screen',
             condition=IfCondition(LaunchConfiguration('sensormon')),
