@@ -108,6 +108,7 @@ def generate_launch_description():
                 # input
                 ('/nmea', '/gps/nmea'),
                 #ouput
+                # ('/rtcm', '/gps/rtcm')
             ]
         ),  
         

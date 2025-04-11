@@ -1,6 +1,7 @@
 /**:
   um982_node:
     ros__parameters:
+    
       port:
         gnss: /dev/UM982
         gnss_baudrate: 115200
@@ -9,13 +10,16 @@
 
       frame_id: gps_left_link
       
-      # 90 deg offset right to left in rad
-      heading_offset: 1.5707963267948966
+      # horizontal setup
+      heading_offset: 1.57
 
+      heading_system: 'enu'
+      
       publish:
         nmea: true
-      
+
       verbose: true
+
       
 
 
