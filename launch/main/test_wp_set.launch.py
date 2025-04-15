@@ -22,7 +22,7 @@ ARGS = [
     
     DeclareLaunchArgument(
         "rl",
-        default_value="true",
+        default_value="false",
         description="Use robot_localization"
     ),
     
@@ -40,47 +40,38 @@ def generate_launch_description():
     )
 
 
-    # robot localization
-    rl_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
+    return LaunchDescription(ARGS + [
+        
+        # robot localization
+        IncludeLaunchDescription(
             PathJoinSubstitution(
                 [FindPackageShare('mowbot_legacy_launch'), 
                 'launch', 'main', 'components', 'rl_dual_ekf_navsat.launch.py']
-            )
+            ),
+            condition=IfCondition(LaunchConfiguration("rl"))
         ),
-        condition=IfCondition(LaunchConfiguration("rl"))
-    )
-
-    # Include another launch file
-    mapviz_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
+        
+        Node(
+            package='py_mowbot_utils',
+            executable='gps_waypoints_logger',
+            name='gps_waypoints_logger',
+            output='screen',
+            remappings=[
+                ('/gps/fix', 'gps/fix_filtered'),
+                ('/imu', '/gps/heading')
+            ]
+        ),
+        
+        IncludeLaunchDescription(
             PathJoinSubstitution(
                 [FindPackageShare('mowbot_legacy_launch'), 
                 'launch', 'main', 'components', 'mapviz.launch.py']
-            )
-        ),
-        launch_arguments={
-            "fix_topic": "gps/fix_filtered",
-            "mvc_config": mapviz_config,
-        }.items(),
-        condition=IfCondition(LaunchConfiguration("mapviz"))
-    )
-
-    # Node that should start first
-    gps_waypoints_node = Node(
-        package='py_mowbot_utils',
-        executable='gps_waypoints_logger',
-        name='gps_waypoints_logger',
-        output='screen',
-        remappings=[
-            ('/gps/fix', 'gps/fix_filtered'),
-            # ('/gps/fix', '/gps/fix'),
-            ('/imu', '/gps/heading')
-        ]
-    )
-
-    return LaunchDescription(ARGS + [
-        mapviz_launch,
-        gps_waypoints_node,
-        rl_launch,
+            ),
+            launch_arguments={
+                "fix_topic": "gps/fix_filtered",
+                "mvc_config": mapviz_config,
+            }.items(),
+            condition=IfCondition(LaunchConfiguration("mapviz"))
+        )
+        
     ])

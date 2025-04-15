@@ -5,6 +5,6 @@ ros2 launch mowbot_legacy_launch bringup.launch.py uros:=true foxglove:=true imu
 ros2 launch mowbot_legacy_launch test_nav_no_map.launch.py rviz:=true rl:=true
 
 
-ros2 bag play rosbag_mod/test/ --loop
+ros2 bag play test_assets/rosbag/rosbag_mod/test/ --loop
 ros2 run py_mowbot_utils sensor_monitor_2
 ros2 launch foxglove_bridge foxglove_bridge_launch.xml
